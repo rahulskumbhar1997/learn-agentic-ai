@@ -2,5 +2,5 @@ langchain==1.2.13
 langchain-core==1.2.21
 langchain-openai==1.1.12
 langchain-aws==1.4.1
-rich
-tavily-python
+rich==15.0.0
+tavily-python==0.7.24

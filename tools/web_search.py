@@ -1,7 +1,12 @@
 from .base import Tool
 from tavily import TavilyClient
+import os
 
 class WebSearch(Tool):
+
+    def __init__(self):
+        tavily_key = os.environ["TAVILY_API_KEY"] 
+        self._client = TavilyClient(api_key=tavily_key)
 
     @property
     def name(self):
@@ -33,9 +38,7 @@ class WebSearch(Tool):
         :return: Search results (dict)
         """
 
-        client = TavilyClient(api_key="")
-
-        response = client.search(
+        response = self._client.search(
             query=query,
             max_results=max_results
         )

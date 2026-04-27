@@ -1,5 +1,9 @@
 from .base import Tool
 
+"""
+Implement a registry pattern to manage the tools. With this you can easily plug-in new tools.
+"""
+
 class Registry:
 
 

@@ -1,10 +1,11 @@
+import config
 from .base import BaseLLM
 from langchain_aws import ChatBedrockConverse
 
 class Bedrock(BaseLLM):
 
     def __init__(self):
-        self._agent = ChatBedrockConverse(model="apac.amazon.nova-lite-v1:0", region_name="ap-south-1")
+        self._agent = ChatBedrockConverse(model=config.BEDROCK_MODEL_NAME, region_name=config.AWS_REGION_NAME)
 
     @property
     def name(self):

@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 from langchain.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 import json
 
+"""
+Extend this class to implement different LLM Clients like Amazon BedRock, OpenAI, Azure etc. 
+"""
 class BaseLLM(ABC):
 
     @property
@@ -15,6 +18,10 @@ class BaseLLM(ABC):
 
     @staticmethod
     def _convert_message(messages: list[dict], tools: list):
+
+        """
+        Convert the message to the format accepted by LLM Client.
+        """
 
         lc_message = []
         for msg in messages:
