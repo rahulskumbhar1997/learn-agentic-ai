@@ -7,7 +7,7 @@ An AI agent implementation using LangChain and AWS Bedrock that can execute mult
 This project demonstrates a basic agentic AI system with the following capabilities:
 
 - **LLM Integration**: Uses AWS Bedrock with Amazon Nova Lite model for language understanding
-- **Tool Ecosystem**: Extensible tool system supporting Calculator and Weather tools
+- **Tool Ecosystem**: Extensible tool system with Calculator, Weather, and Web Search tools
 - **Agent Architecture**: Intelligent agent that decides which tools to use based on user input
 - **Memory System**: Maintains conversation history and context
 - **Interactive CLI**: User-friendly command-line interface for interaction
@@ -28,11 +28,12 @@ This project demonstrates a basic agentic AI system with the following capabilit
 │   ├── base.py         # Base LLM class
 │   └── bedrock.py      # AWS Bedrock integration
 └── tools/               # Tool implementations
-    ├── __init__.py
-    ├── base.py         # Base tool class
-    ├── calculator.py   # Calculator tool
-    ├── weather.py      # Weather tool
-    └── registry.py     # Tool registry management
+   ├── __init__.py
+   ├── base.py         # Base tool class
+   ├── calculator.py   # Calculator tool
+   ├── weather.py      # Weather tool
+   ├── web_search.py   # Tavily-powered web search tool
+   └── registry.py     # Tool registry management
 ```
 
 ## 🚀 Getting Started
@@ -41,6 +42,7 @@ This project demonstrates a basic agentic AI system with the following capabilit
 
 - Python 3.8 or higher
 - AWS Bedrock access (with appropriate credentials configured)
+- Tavily API key for web search tool
 - `pip` or `pipenv` for dependency management
 
 ### Installation
@@ -62,10 +64,32 @@ This project demonstrates a basic agentic AI system with the following capabilit
    pip install -r requirements.txt
    ```
 
-4. Configure AWS credentials:
+4. Configure environment variables (required before running `main.py`):
+
+   macOS/Linux:
    ```bash
-   aws configure
+   export AWS_ACCESS_KEY_ID="your_aws_access_key_id"
+   export AWS_SECRET_ACCESS_KEY="your_aws_secret_access_key"
+   export AWS_REGION_NAME="ap-south-1"
+   export TAVILY_API_KEY="your_tavily_api_key"
    ```
+
+   Optional (if you use temporary AWS credentials):
+   ```bash
+   export AWS_SESSION_TOKEN="your_aws_session_token"
+   ```
+
+   Windows PowerShell:
+   ```powershell
+   $env:AWS_ACCESS_KEY_ID="your_aws_access_key_id"
+   $env:AWS_SECRET_ACCESS_KEY="your_aws_secret_access_key"
+   $env:AWS_REGION_NAME="ap-south-1"
+   $env:TAVILY_API_KEY="your_tavily_api_key"
+   ```
+
+   Notes:
+   - AWS Bedrock does not use a single API key. It uses AWS credentials (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) as shown above.
+   - Region defaults to `ap-south-1` in `config.py`, but setting `AWS_REGION_NAME` explicitly is recommended.
 
 ## 💻 Usage
 
@@ -80,7 +104,8 @@ python main.py
 Then type your commands at the prompt. Examples:
 - `What is the capital of India?`
 - `Calculate 25 * 4`
-- `What's the weather in New York?`
+- `What is the weather at latitude 40.7128 and longitude -74.0060?`
+- `Search latest AI news`
 - Type `exit` to quit
 
 ### Programmatic Usage
@@ -89,11 +114,12 @@ You can also run the agent directly with specific input:
 
 ```python
 from agent import Agent
-from tools import Calculator, Registry, Weather
+from tools import Calculator, Registry, Weather, WebSearch
 
 registry = Registry()
 registry.register(Calculator())
 registry.register(Weather())
+registry.register(WebSearch())
 agent = Agent(tool_registry=registry)
 
 response = agent.run(user_input="What is capital of India?")
@@ -105,6 +131,7 @@ Edit `config.py` to customize:
 
 - `BEDROCK_MODEL_NAME`: The AWS Bedrock model to use (default: `apac.amazon.nova-lite-v1:0`)
 - `MAX_AGENT_STEPS`: Maximum number of iterations the agent can take (default: 10)
+- `AWS_REGION_NAME`: AWS region used by Bedrock client (default: `ap-south-1`)
 
 ## 🔧 Architecture
 
@@ -125,7 +152,7 @@ Abstraction layer for language models:
 ### Tools System
 Pluggable tool system with:
 - Base tool interface
-- Built-in tools: Calculator, Weather
+- Built-in tools: Calculator, Weather, Web Search (Tavily)
 - Tool registry for discovery and management
 
 ### Memory
@@ -141,6 +168,7 @@ Conversational memory system that:
 - **langchain-openai**: OpenAI integration (dependency chain)
 - **langchain-aws**: AWS Bedrock integration
 - **rich**: Enhanced terminal output formatting
+- **tavily-python**: Web search integration
 
 ## 🛠️ Adding New Tools
 
