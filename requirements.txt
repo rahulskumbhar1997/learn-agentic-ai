@@ -3,3 +3,4 @@ langchain-core==1.2.21
 langchain-openai==1.1.12
 langchain-aws==1.4.1
 rich
+tavily-python

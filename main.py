@@ -1,5 +1,5 @@
 from agent import Agent
-from tools import Calculator, Registry, Weather
+from tools import Calculator, Registry, Weather, WebSearch
 
 def interactive_mode():
 
@@ -18,6 +18,7 @@ if __name__ == "__main__":
     registry = Registry()
     registry.register(Calculator())
     registry.register(Weather())
+    registry.register(WebSearch())
     agent = Agent(tool_registry=registry)
     # agent.run(user_input="What is capital of India. Answer in one line.")
     interactive_mode()
