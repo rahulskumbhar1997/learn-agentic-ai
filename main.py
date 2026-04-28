@@ -20,6 +20,5 @@ if __name__ == "__main__":
     registry.register(Weather())
     registry.register(WebSearch())
     agent = Agent(tool_registry=registry)
-    # agent.run(user_input="What is capital of India. Answer in one line.")
     interactive_mode()
     

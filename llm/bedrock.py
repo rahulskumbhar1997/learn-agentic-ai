@@ -17,7 +17,7 @@ class Bedrock(BaseLLM):
         bound_agent = self._agent.bind_tools(tools=tools)
         
         lc_message = self._convert_message(messages=message, tools=tools)
-        invokation_response = bound_agent.invoke(lc_message)
-        return self._parse_response(invokation_response)
+        invocation_response = bound_agent.invoke(lc_message)
+        return self._parse_response(invocation_response)
 
     

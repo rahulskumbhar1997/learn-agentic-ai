@@ -40,8 +40,8 @@ This project demonstrates a basic agentic AI system with the following capabilit
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- AWS Bedrock access (with appropriate credentials configured)
+- Python 3.13 or higher
+- AWS Bedrock access (with Bedrock API key configured)
 - Tavily API key for web search tool
 - `pip` or `pipenv` for dependency management
 
@@ -68,27 +68,20 @@ This project demonstrates a basic agentic AI system with the following capabilit
 
    macOS/Linux:
    ```bash
-   export AWS_ACCESS_KEY_ID="your_aws_access_key_id"
-   export AWS_SECRET_ACCESS_KEY="your_aws_secret_access_key"
+   export AWS_BEARER_TOKEN_BEDROCK="your_bedrock_api_key"
    export AWS_REGION_NAME="ap-south-1"
    export TAVILY_API_KEY="your_tavily_api_key"
    ```
 
-   Optional (if you use temporary AWS credentials):
-   ```bash
-   export AWS_SESSION_TOKEN="your_aws_session_token"
-   ```
-
    Windows PowerShell:
    ```powershell
-   $env:AWS_ACCESS_KEY_ID="your_aws_access_key_id"
-   $env:AWS_SECRET_ACCESS_KEY="your_aws_secret_access_key"
+   $env:AWS_BEARER_TOKEN_BEDROCK="your_bedrock_api_key"
    $env:AWS_REGION_NAME="ap-south-1"
    $env:TAVILY_API_KEY="your_tavily_api_key"
    ```
 
    Notes:
-   - AWS Bedrock does not use a single API key. It uses AWS credentials (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) as shown above.
+   - This setup uses Bedrock API key authentication via `AWS_BEARER_TOKEN_BEDROCK`.
    - Region defaults to `ap-south-1` in `config.py`, but setting `AWS_REGION_NAME` explicitly is recommended.
 
 ## 💻 Usage
@@ -104,26 +97,10 @@ python main.py
 Then type your commands at the prompt. Examples:
 - `What is the capital of India?`
 - `Calculate 25 * 4`
-- `What is the weather at latitude 40.7128 and longitude -74.0060?`
+- `What is the weather current weather in Pune?`
 - `Search latest AI news`
 - Type `exit` to quit
 
-### Programmatic Usage
-
-You can also run the agent directly with specific input:
-
-```python
-from agent import Agent
-from tools import Calculator, Registry, Weather, WebSearch
-
-registry = Registry()
-registry.register(Calculator())
-registry.register(Weather())
-registry.register(WebSearch())
-agent = Agent(tool_registry=registry)
-
-response = agent.run(user_input="What is capital of India?")
-```
 
 ## ⚙️ Configuration
 
@@ -181,11 +158,3 @@ To add a new tool:
    from tools import CustomTool
    registry.register(CustomTool())
    ```
-
-## 📝 License
-
-MIT
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit pull requests.
