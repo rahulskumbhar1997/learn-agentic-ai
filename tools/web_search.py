@@ -29,7 +29,7 @@ class WebSearch(Tool):
             "required": ["query"]
         }
     
-    def execute(self,query: str, max_results: int = 5):
+    def execute(self,query: str, max_results: int = 10):
         """
         Perform a Tavily web search.
 
