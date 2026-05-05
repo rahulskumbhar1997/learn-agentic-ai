@@ -1,23 +1,27 @@
-import config
-from .base import BaseLLM
+from llm import BaseLLM
+from langchain.agents import create_agent
 from langchain_aws import ChatBedrockConverse
+from langgraph.checkpoint.memory import InMemorySaver
+from tools.weather import get_weather
+from tools.web_search import web_search
+from mcp_clients import TravelMCP
+import asyncio
 
-class Bedrock(BaseLLM):
 
-    def __init__(self):
-        self._agent = ChatBedrockConverse(model=config.BEDROCK_MODEL_NAME, region_name=config.AWS_REGION_NAME)
+class BedRock(BaseLLM):
 
-    @property
-    def name(self):
-        return "bedrock"
-    
-    def invoke(self, message: list[dict], tools: list | None = None):
-        tools = tools or []
-        self._agent.supports_tool_choice_values = ["tool"]
-        bound_agent = self._agent.bind_tools(tools=tools)
+    def __init__(self, tools=None):
+        self._llm = ChatBedrockConverse(
+            model="apac.amazon.nova-lite-v1:0", region_name="ap-south-1"
+        )
         
-        lc_message = self._convert_message(messages=message, tools=tools)
-        invocation_response = bound_agent.invoke(lc_message)
-        return self._parse_response(invocation_response)
+        self._agent = create_agent(self._llm, checkpointer=InMemorySaver(), tools=tools)
 
-    
+    def name(self) -> str:
+        return "bedrock"
+
+    async def invoke(self, messages, thread_id):
+
+        config = {"configurable": {"thread_id": thread_id}}
+        response = await self._agent.ainvoke({"messages": messages}, config=config)
+        return response
