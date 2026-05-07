@@ -11,4 +11,3 @@ class BaseLLM(ABC):
     @abstractmethod
     def invoke(self, messages: list, thread_id: str):
         """Invoke LLM Client"""
-

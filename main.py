@@ -7,6 +7,7 @@ from rich.console import Console
 from rich.markdown import Markdown
 import asyncio
 
+
 def main():
     while True:
         user_input = input("\n> ")
@@ -15,13 +16,15 @@ def main():
         elif user_input.lower() == "exit":
             break
         else:
-            response = asyncio.run(llm_client.invoke(
-                [
+            response = asyncio.run(
+                llm_client.invoke(
+                    [
                         SystemMessage(content=system_prompt),
                         HumanMessage(content=user_input),
-                ],
-                thread_id=thread_id
-            ))
+                    ],
+                    thread_id=thread_id,
+                )
+            )
             final_response = response["messages"][-1].content
             md = Markdown(final_response)
             console.print(md, style="bold green")
@@ -50,5 +53,5 @@ if __name__ == "__main__":
     """
 
     thread_id = "test_thread_v2"
-    config = {"configurable": {"thread_id": thread_id}}
+
     main()
