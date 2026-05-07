@@ -1,62 +1,60 @@
-# Agentic AI - Basic Project 1
+# Agentic AI
 
-An AI agent implementation using LangChain and AWS Bedrock that can execute multiple tools and maintain conversation memory.
+A multi-provider AI agent implementation using LangChain/LangGraph with tool calling, MCP (Model Context Protocol) integrations, and conversational memory.
 
 ## 📋 Project Overview
 
-This project demonstrates a basic agentic AI system with the following capabilities:
+This project demonstrates an agentic AI system featuring:
 
-- **LLM Integration**: Uses AWS Bedrock with Amazon Nova Lite model for language understanding
-- **Tool Ecosystem**: Extensible tool system with Calculator, Weather, and Web Search tools
-- **Agent Architecture**: Intelligent agent that decides which tools to use based on user input
-- **Memory System**: Maintains conversation history and context
-- **Interactive CLI**: User-friendly command-line interface for interaction
+- **Multi-Provider LLM Support**: AWS Bedrock (Amazon Nova Lite) and Azure OpenAI (GPT-4.1-mini)
+- **LangGraph Agents**: Intelligent agents with built-in memory using LangGraph's `create_agent`
+- **Native Tools**: Weather forecasts (Open-Meteo) and web search (Tavily)
+- **MCP Integrations**: External tool servers for travel (Kiwi.com) and sports (cricket data)
+- **LangSmith Tracing**: Full observability for LLM calls, tool executions, and agent runs
+- **Interactive CLI**: Rich markdown-formatted responses in the terminal
 
 ## 📁 Project Structure
 
 ```
 .
 ├── main.py              # Entry point with interactive CLI
-├── config.py            # Configuration settings (model name, max steps)
+├── config.py            # Configuration settings
 ├── requirements.txt     # Python dependencies
-├── agent/               # Agent implementation
+├── llm/                 # LLM provider implementations
 │   ├── __init__.py
-│   ├── agent.py        # Core agent logic
-│   └── memory.py       # Memory management
-├── llm/                 # Language Model layer
+│   ├── base.py          # Abstract base class for LLM clients
+│   ├── bedrock.py       # AWS Bedrock integration
+│   └── azure_foundry.py # Azure OpenAI integration
+├── tools/               # Native LangChain tools
 │   ├── __init__.py
-│   ├── base.py         # Base LLM class
-│   └── bedrock.py      # AWS Bedrock integration
-└── tools/               # Tool implementations
-   ├── __init__.py
-   ├── base.py         # Base tool class
-   ├── calculator.py   # Calculator tool
-   ├── weather.py      # Weather tool
-   ├── web_search.py   # Tavily-powered web search tool
-   └── registry.py     # Tool registry management
+│   ├── weather.py       # Open-Meteo weather API
+│   └── web_search.py    # Tavily web search
+└── mcp_clients/         # MCP (Model Context Protocol) clients
+    ├── __init__.py
+    ├── travel.py        # Kiwi.com travel/flights MCP
+    └── sports.py        # Cricket sports data MCP
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.13 or higher
-- AWS Bedrock access (with Bedrock API key configured)
-- Tavily API key for web search tool
-- `pip` or `pipenv` for dependency management
+- Python 3.11+
+- Tavily API key (for web search)
+- Azure OpenAI credentials (if using Azure) or AWS credentials (if using Bedrock)
 
 ### Installation
 
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd agentic-ai/basic-project-1
+   cd learn-agentic-ai
    ```
 
-2. Create a virtual environment:
+2. Create and activate a virtual environment:
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   source venv/bin/activate  # Windows: venv\Scripts\activate
    ```
 
 3. Install dependencies:
@@ -64,41 +62,39 @@ This project demonstrates a basic agentic AI system with the following capabilit
    pip install -r requirements.txt
    ```
 
-4. Configure environment variables (required before running `main.py`):
+4. Create a `.env` file (see `.env.example`) with your credentials:
+   ```env
+   # LangSmith (for tracing and observability)
+   LANGSMITH_TRACING=true
+   LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+   LANGSMITH_API_KEY=your_langsmith_api_key
+   LANGSMITH_PROJECT=your_project_name
 
-   macOS/Linux:
-   ```bash
-   export AWS_BEARER_TOKEN_BEDROCK="your_bedrock_api_key"
-   export AWS_REGION_NAME="ap-south-1"
-   export TAVILY_API_KEY="your_tavily_api_key"
+   # Tavily (required for web search)
+   TAVILY_API_KEY=your_tavily_api_key
+
+   # Azure OpenAI (default provider)
+   AZURE_OPENAI_API_KEY=your_azure_api_key
+   AZURE_OPENAI_ENDPOINT=your_azure_endpoint
+   AZURE_OPENAI_API_VERSION=your_api_version
+
+   # AWS Bedrock (alternative provider)
+   AWS_BEARER_TOKEN_BEDROCK=your_bedrock_token
    ```
 
-   Windows PowerShell:
-   ```powershell
-   $env:AWS_BEARER_TOKEN_BEDROCK="your_bedrock_api_key"
-   $env:AWS_REGION_NAME="ap-south-1"
-   $env:TAVILY_API_KEY="your_tavily_api_key"
-   ```
+## Usage
 
-   Notes:
-   - This setup uses Bedrock API key authentication via `AWS_BEARER_TOKEN_BEDROCK`.
-   - Region defaults to `ap-south-1` in `config.py`, but setting `AWS_REGION_NAME` explicitly is recommended.
-
-## 💻 Usage
-
-### Interactive Mode
-
-Run the project in interactive mode to chat with the AI agent:
+Run the interactive CLI:
 
 ```bash
 python main.py
 ```
 
-Then type your commands at the prompt. Examples:
-- `What is the capital of India?`
-- `Calculate 25 * 4`
-- `What is the weather current weather in Pune?`
-- `Search latest AI news`
+Example queries:
+- `What's the weather in Tokyo?`
+- `Search for latest news on AI`
+- `Find flights from New York to London`
+- `What are the upcoming cricket matches?`
 - Type `exit` to quit
 
 
@@ -106,55 +102,152 @@ Then type your commands at the prompt. Examples:
 
 Edit `config.py` to customize:
 
-- `BEDROCK_MODEL_NAME`: The AWS Bedrock model to use (default: `apac.amazon.nova-lite-v1:0`)
-- `MAX_AGENT_STEPS`: Maximum number of iterations the agent can take (default: 10)
-- `AWS_REGION_NAME`: AWS region used by Bedrock client (default: `ap-south-1`)
+```python
+# AWS Bedrock settings
+BEDROCK_MODEL = "apac.amazon.nova-lite-v1:0"
+BEDROCK_REGION = "ap-south-1"
 
-## 🔧 Architecture
+# Azure OpenAI settings
+AZURE_DEPLOYMENT_NAME = "gpt-4.1-mini"
+AZURE_DEPLOYMENT_API_VERSION = "2025-01-01-preview"
+```
 
-### Agent
-The core agent orchestrates the interaction between the LLM and tools:
-- Receives user input
-- Queries the LLM to determine which tools to use
-- Executes the appropriate tools
-- Maintains context and memory
-- Returns results to the user
+To switch LLM providers, modify `main.py`:
+```python
+# Use Azure OpenAI (default)
+llm_client = AzureFoundry(tools=tools)
+
+# Or use AWS Bedrock
+# llm_client = BedRock(tools=tools)
+```
+
+## Architecture
 
 ### LLM Layer
-Abstraction layer for language models:
-- Base LLM interface
-- AWS Bedrock implementation
-- Extensible for other providers
 
-### Tools System
-Pluggable tool system with:
-- Base tool interface
-- Built-in tools: Calculator, Weather, Web Search (Tavily)
-- Tool registry for discovery and management
+Abstract base class (`BaseLLM`) with implementations for:
+- **AzureFoundry**: Azure OpenAI with GPT-4.1-mini
+- **BedRock**: AWS Bedrock with Amazon Nova Lite
 
-### Memory
-Conversational memory system that:
-- Tracks interaction history
-- Maintains context across turns
-- Supports multi-turn conversations
+Both use LangGraph's `create_agent` with `InMemorySaver` for conversation memory.
 
-## 📦 Dependencies
+### Tools
 
-- **langchain**: LLM framework and orchestration
-- **langchain-core**: Core abstractions
-- **langchain-openai**: OpenAI integration (dependency chain)
-- **langchain-aws**: AWS Bedrock integration
-- **rich**: Enhanced terminal output formatting
-- **tavily-python**: Web search integration
+Native LangChain tools decorated with `@tool`:
+- **get_weather**: Fetches weather data from Open-Meteo API (supports current, hourly, and daily forecasts)
+- **web_search**: Performs web searches using Tavily
 
-## 🛠️ Adding New Tools
+### MCP Clients
 
-To add a new tool:
+Model Context Protocol integrations using `langchain-mcp-adapters`:
+- **TravelMCP**: Flight search and travel info via Kiwi.com
+- **SportsMCP**: Cricket match data via whensport.com
 
-1. Create a new file in `tools/` directory
-2. Inherit from the base tool class
-3. Register in the tool registry:
-   ```python
-   from tools import CustomTool
-   registry.register(CustomTool())
+## 📊 LangSmith Tracing
+
+This project integrates [LangSmith](https://smith.langchain.com/) for comprehensive observability of your AI agent.
+
+### What Gets Traced
+
+- **LLM Calls**: Every request/response to Azure OpenAI or AWS Bedrock
+- **Tool Executions**: Input/output of weather, web search, and MCP tools
+- **Agent Runs**: Full execution flow including reasoning steps and tool selections
+- **Token Usage**: Track token consumption and costs per request
+- **Latency Metrics**: Response times for each component
+
+### Setup
+
+1. Create a free account at [smith.langchain.com](https://smith.langchain.com/)
+2. Create a new project and copy your API key
+3. Add the following to your `.env` file:
+   ```env
+   LANGSMITH_TRACING=true
+   LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+   LANGSMITH_API_KEY=your_api_key
+   LANGSMITH_PROJECT=your_project_name
    ```
+
+### Viewing Traces
+
+Once configured, all agent interactions are automatically logged. Visit [smith.langchain.com](https://smith.langchain.com/) to:
+
+- View detailed execution traces for each conversation
+- Debug tool call failures and LLM responses
+- Analyze latency and token usage patterns
+- Compare runs across different prompts or configurations
+
+> **Note**: Set `LANGSMITH_TRACING=false` to disable tracing in production or for privacy.
+
+## Adding New Components
+
+### New Tool
+
+Create a file in `tools/` and use the `@tool` decorator:
+
+```python
+from langchain.tools import tool
+
+@tool(description="Description of what your tool does")
+def my_tool(param: str) -> str:
+    """Tool docstring."""
+    # Implementation
+    return result
+```
+
+Export it in `tools/__init__.py` and add to the tools list in `main.py`.
+
+### New MCP Client
+
+Create a file in `mcp_clients/`:
+
+```python
+from langchain_mcp_adapters.client import MultiServerMCPClient
+
+class MyMCP:
+    def __init__(self):
+        self._client = MultiServerMCPClient({
+            "server_name": {
+                "url": "https://mcp-server-url",
+                "transport": "streamable_http"
+            }
+        })
+
+    async def get_tools(self):
+        return await self._client.get_tools()
+```
+
+### New LLM Provider
+
+Create a file in `llm/` inheriting from `BaseLLM`:
+
+```python
+from .base import BaseLLM
+from langchain.agents import create_agent
+from langgraph.checkpoint.memory import InMemorySaver
+
+class MyProvider(BaseLLM):
+    def __init__(self, tools=None):
+        self._llm = # Initialize your LangChain chat model
+        self._agent = create_agent(self._llm, tools=tools, checkpointer=InMemorySaver())
+
+    def name(self) -> str:
+        return "my_provider"
+
+    async def invoke(self, messages: list, thread_id: str):
+        config = {"configurable": {"thread_id": thread_id}}
+        return await self._agent.ainvoke({"messages": messages}, config=config)
+```
+
+## Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| langchain | LLM framework and orchestration |
+| langchain-aws | AWS Bedrock integration |
+| langchain-openai | Azure OpenAI integration |
+| langchain-mcp-adapters | MCP client support |
+| langgraph | Agent creation with memory |
+| langsmith | Tracing and observability |
+| tavily-python | Web search API |
+| rich | Terminal markdown formatting |
+| python-dotenv | Environment variable management |
